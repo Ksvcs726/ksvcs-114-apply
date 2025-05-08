@@ -64,12 +64,13 @@ with tab1:
             重複 = not 已有_df[(已有_df["統測報名序號"] == 統測報名序號) & (已有_df["身分證字號"] == 身分證字號)].empty
 
             if 錯誤代碼:
-                st.error(f"以下校系代碼不屬於「{群別}」：{', '.join(錯誤代碼)}")
+                st.error(f"以下校系代碼不屬於「{', '.join(群別)}」：{', '.join(錯誤代碼)}")
             elif 重複:
                 st.warning("⚠️ 您已經完成報名，請勿重複填寫。")
             else:
-                now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                row = [統測報名序號, 姓名, 身分證字號, 群別] + 填寫代碼 + [""] * (6 - len(填寫代碼)) + [now]
+                tz = pytz.timezone("Asia/Taipei")
+                now = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
+                row = [統測報名序號, 姓名, 身分證字號, "、".join(群別)] + 填寫代碼 + [""] * (6 - len(填寫代碼)) + [now]
                 報名工作表.append_row(row)
                 st.success("✅ 報名成功！您的資料已儲存。")
 
