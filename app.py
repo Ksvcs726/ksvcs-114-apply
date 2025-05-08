@@ -58,6 +58,7 @@ with tab1:
         if submitted:
             合法代碼 = df[df['欲報名之群(類)別'].isin(群別)]['校系代碼'].tolist()
             志願清單 = [志願1, 志願2, 志願3, 志願4, 志願5, 志願6]
+        submitted = st.form_submit_button("✅ 送出報名")
             填寫代碼 = [c.strip() for c in 志願清單 if c.strip()]
             錯誤代碼 = [c for c in 填寫代碼 if c not in 合法代碼]
 
