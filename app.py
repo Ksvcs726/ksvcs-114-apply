@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import gspread
@@ -7,7 +6,7 @@ import datetime
 import json
 
 # 從 Streamlit secrets 讀取 Google 認證資訊
-creds_dict = st.secrets["GOOGLE_CREDENTIALS"]
+creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
 CREDS = Credentials.from_service_account_info(creds_dict, scopes=[
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive'
@@ -57,6 +56,13 @@ with tab1:
 
             所有資料 = 報名工作表.get_all_values()
             已有_df = pd.DataFrame(所有資料[1:], columns=所有資料[0])
+
+            # 檢查欄位名稱是否齊全
+            必要欄位 = ["統測報名序號", "身分證字號"]
+            缺少欄位 = [col for col in 必要欄位 if col not in 已有_df.columns]
+            if 缺少欄位:
+                st.error(f"❌ Google Sheet 缺少欄位：{', '.join(缺少欄位)}，請確認標題列")
+                st.stop()
             重複 = not 已有_df[(已有_df["統測報名序號"] == 統測報名序號) & (已有_df["身分證字號"] == 身分證字號)].empty
 
             if 錯誤代碼:
