@@ -66,7 +66,7 @@ with tab1:
             if 錯誤代碼:
                 st.error(f"以下校系代碼不屬於「{群別}」：{', '.join(錯誤代碼)}")
             elif 重複:
-                st.warning(⚠️ 您已經完成報名，請勿重複填寫。")
+                st.warning(⚠您已經完成報名，請勿重複填寫。")
             else:
                 now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 row = [統測報名序號, 姓名, 身分證字號, 群別] + 填寫代碼 + [""] * (6 - len(填寫代碼)) + [now]
