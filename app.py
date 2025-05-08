@@ -8,7 +8,7 @@ import pytz
 import json
 
 # 從 Streamlit secrets 讀取 Google 認證資訊
-creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+creds_dict = st.secrets["GOOGLE_CREDENTIALS"]
 CREDS = Credentials.from_service_account_info(creds_dict, scopes=[
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive'
