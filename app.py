@@ -5,7 +5,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 import datetime
 import json
-st.write("GOOGLE_CREDENTIALS 存在？", "GOOGLE_CREDENTIALS" in st.secrets)
+
 # 從 Streamlit secrets 讀取 Google 認證資訊
 creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
 CREDS = Credentials.from_service_account_info(creds_dict, scopes=[
