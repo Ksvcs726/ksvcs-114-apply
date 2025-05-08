@@ -38,15 +38,18 @@ with tab1:
             身分證字號 = st.text_input("身分證字號")
         with col2:
             姓名 = st.text_input("姓名")
-            群別 = st.selectbox("欲報名之群(類)別", 群別選項)
+            群別 = st.multiselect("欲報名之群(類)別（最多選三個）", 群別選項, max_selections=3)
+        if len(群別) == 0:
+            st.warning("請至少選擇一個群(類)別")
+            st.stop()
 
         st.markdown("請依序填寫最多6組志願校系代碼：")
-        志願1 = st.text_input("第1志願")
-        志願2 = st.text_input("第2志願")
-        志願3 = st.text_input("第3志願")
-        志願4 = st.text_input("第4志願")
-        志願5 = st.text_input("第5志願")
-        志願6 = st.text_input("第6志願")
+        志願1 = st.text_input("第1組校系代碼")
+        志願2 = st.text_input("第2組校系代碼")
+        志願3 = st.text_input("第3組校系代碼")
+        志願4 = st.text_input("第4組校系代碼")
+        志願5 = st.text_input("第5組校系代碼")
+        志願6 = st.text_input("第6組校系代碼")
 
         submitted = st.form_submit_button("✅ 送出報名")
 
@@ -63,7 +66,7 @@ with tab1:
             if 錯誤代碼:
                 st.error(f"以下校系代碼不屬於「{群別}」：{', '.join(錯誤代碼)}")
             elif 重複:
-                st.warning("⚠️ 您已經完成報名，請勿重複填寫。")
+                st.warning(⚠️ 您已經完成報名，請勿重複填寫。")
             else:
                 now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 row = [統測報名序號, 姓名, 身分證字號, 群別] + 填寫代碼 + [""] * (6 - len(填寫代碼)) + [now]
