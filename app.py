@@ -39,9 +39,6 @@ with tab1:
         with col2:
             姓名 = st.text_input("姓名")
             群別 = st.selectbox("統測報考群別", 群別選項)
-        # 單選不需檢查群別是否為空
-            st.warning("請至少選擇一個群(類)別")
-            st.stop()
 
         st.markdown("請依序填寫最多6組志願校系代碼：")
         志願1 = st.text_input("第1組校系代碼")
