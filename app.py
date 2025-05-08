@@ -53,6 +53,8 @@ with tab1:
 
         submitted = st.form_submit_button("✅ 送出報名")
 
+        submitted = st.form_submit_button("✅ 送出報名")
+
         if submitted:
             合法代碼 = df[df['欲報名之群(類)別'] == 群別]['校系代碼'].tolist()
             志願清單 = [志願1, 志願2, 志願3, 志願4, 志願5, 志願6]
