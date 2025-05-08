@@ -48,8 +48,8 @@ with tab1:
         志願1 = st.text_input("第1志願")
         志願2 = st.text_input("第2志願")
         志願3 = st.text_input("第3志願")
-        志願4 = st.text_input("第4志願碼")
-        志願5 = st.text_input("第5志願碼")
+        志願4 = st.text_input("第4志願")
+        志願5 = st.text_input("第5志願")
         志願6 = st.text_input("第6志願")
 
         submitted = st.form_submit_button("✅ 送出報名")
