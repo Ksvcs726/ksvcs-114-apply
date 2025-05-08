@@ -5,11 +5,10 @@ import gspread
 from google.oauth2.service_account import Credentials
 import datetime
 import pytz
-import pytz
 import json
 
 # 從 Streamlit secrets 讀取 Google 認證資訊
-creds_dict = st.secrets["GOOGLE_CREDENTIALS"]
+creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
 CREDS = Credentials.from_service_account_info(creds_dict, scopes=[
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive'
@@ -49,32 +48,42 @@ with tab1:
         志願5 = st.text_input("第5志願")
         志願6 = st.text_input("第6志願")
 
-        
         submitted = st.form_submit_button("✅ 送出報名")
 
         if submitted:
-            合法代碼 = df[df['欲報名之群(類)別'].isin(群別)]['校系代碼'].tolist()
+            合法代碼 = df[df['欲報名之群(類)別'] == 群別]['校系代碼'].tolist()
             志願清單 = [志願1, 志願2, 志願3, 志願4, 志願5, 志願6]
             填寫代碼 = [c.strip() for c in 志願清單 if c.strip()]
             錯誤代碼 = [c for c in 填寫代碼 if c not in 合法代碼]
 
             所有資料 = 報名工作表.get_all_values()
             已有_df = pd.DataFrame(所有資料[1:], columns=所有資料[0])
-            必要欄位 = ["統測報名序號", "身分證字號"]
-            缺少欄位 = [col for col in 必要欄位 if col not in 已有_df.columns]
-            if 缺少欄位:
-                st.error(f"❌ Google Sheet 缺少欄位：{', '.join(缺少欄位)}，請確認標題列")
-                st.stop()
-
             重複 = not 已有_df[(已有_df["統測報名序號"] == 統測報名序號) & (已有_df["身分證字號"] == 身分證字號)].empty
 
             if 錯誤代碼:
-                st.error(f"以下校系代碼不屬於「{'、'.join(群別)}」：{', '.join(錯誤代碼)}")
+                st.error(f"以下校系代碼不屬於「{群別}」：{', '.join(錯誤代碼)}")
             elif 重複:
                 st.warning("⚠️ 您已經完成報名，請勿重複填寫。")
             else:
-                tz = pytz.timezone("Asia/Taipei")
-                報名時間 = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
-                row = [統測報名序號, 姓名, 身分證字號, "、".join(群別)] + 填寫代碼 + [""] * (6 - len(填寫代碼)) + [報名時間]
+                now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                row = [統測報名序號, 姓名, 身分證字號, 群別] + 填寫代碼 + [""] * (6 - len(填寫代碼)) + [now]
                 報名工作表.append_row(row)
                 st.success("✅ 報名成功！您的資料已儲存。")
+
+with tab2:
+    st.subheader("🔍 查詢報名紀錄")
+    查序號 = st.text_input("請輸入統測報名序號", key="查序號")
+    查身分 = st.text_input("請輸入身分證字號", key="查身分證")
+    if st.button("查詢"):
+        try:
+            資料 = 報名工作表.get_all_values()
+            標題, 資料列 = 資料[0], 資料[1:]
+            df查 = pd.DataFrame(資料列, columns=標題)
+            結果 = df查[(df查["統測報名序號"] == 查序號) & (df查["身分證字號"] == 查身分)]
+            if 結果.empty:
+                st.info("查無資料，請確認輸入正確。")
+            else:
+                st.success("查詢成功，以下是您已填寫的資料：")
+                st.dataframe(結果)
+        except Exception as e:
+            st.error(f"查詢發生錯誤：{e}")
