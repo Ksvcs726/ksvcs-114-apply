@@ -1,6 +1,4 @@
 
-# 安裝 Gradio（Colab 初次執行需安裝）
-!pip install gradio
 
 import gradio as gr
 import pandas as pd
