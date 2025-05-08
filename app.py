@@ -6,7 +6,7 @@ from google.oauth2.service_account import Credentials
 import datetime
 import pytz
 import json
-st.write("🔍 creds_dict type =", type(st.secrets["GOOGLE_CREDENTIALS"]))
+
 # 從 Streamlit secrets 讀取 Google 認證資訊
 creds_dict = st.secrets["GOOGLE_CREDENTIALS"]
 CREDS = Credentials.from_service_account_info(creds_dict, scopes=[
