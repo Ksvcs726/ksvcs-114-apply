@@ -38,8 +38,8 @@ with tab1:
             身分證字號 = st.text_input("身分證字號")
         with col2:
             姓名 = st.text_input("姓名")
-            群別 = st.multiselect("欲報名之群(類)別（最多選三個）", 群別選項, max_selections=3)
-        if len(群別) == 0:
+            群別 = st.selectbox("統測報考群別", 群別選項)
+        # 單選不需檢查群別是否為空
             st.warning("請至少選擇一個群(類)別")
             st.stop()
 
@@ -64,13 +64,13 @@ with tab1:
             重複 = not 已有_df[(已有_df["統測報名序號"] == 統測報名序號) & (已有_df["身分證字號"] == 身分證字號)].empty
 
             if 錯誤代碼:
-                st.error(f"以下校系代碼不屬於「{', '.join(群別)}」：{', '.join(錯誤代碼)}")
+                st.error(f"以下校系代碼不屬於「{群別}」：{', '.join(錯誤代碼)}")
             elif 重複:
                 st.warning("⚠️ 您已經完成報名，請勿重複填寫。")
             else:
                 tz = pytz.timezone("Asia/Taipei")
                 now = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
-                row = [統測報名序號, 姓名, 身分證字號, "、".join(群別)] + 填寫代碼 + [""] * (6 - len(填寫代碼)) + [now]
+                row = [統測報名序號, 姓名, 身分證字號, 群別] + 填寫代碼 + [""] * (6 - len(填寫代碼)) + [now]
                 報名工作表.append_row(row)
                 st.success("✅ 報名成功！您的資料已儲存。")
 
