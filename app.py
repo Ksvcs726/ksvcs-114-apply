@@ -5,6 +5,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 import datetime
 import pytz
+import pytz
 import json
 
 # 從 Streamlit secrets 讀取 Google 認證資訊
@@ -38,20 +39,23 @@ with tab1:
             身分證字號 = st.text_input("身分證字號")
         with col2:
             姓名 = st.text_input("姓名")
-            群別 = st.selectbox("欲報名之群(類)別", 群別選項)
+            群別 = st.multiselect("欲報名之群(類)別（最多選三個）", 群別選項, max_selections=3)
+        if len(群別) == 0:
+            st.warning("請至少選擇一個群(類)別")
+            st.stop()
 
         st.markdown("請依序填寫最多6組志願校系代碼：")
-        志願1 = st.text_input("第1志願")
-        志願2 = st.text_input("第2志願")
-        志願3 = st.text_input("第3志願")
-        志願4 = st.text_input("第4志願")
-        志願5 = st.text_input("第5志願")
-        志願6 = st.text_input("第6志願")
+        志願1 = st.text_input("第1組校系代碼")
+        志願2 = st.text_input("第2組校系代碼")
+        志願3 = st.text_input("第3組校系代碼")
+        志願4 = st.text_input("第4組校系代碼")
+        志願5 = st.text_input("第5組校系代碼")
+        志願6 = st.text_input("第6組校系代碼")
 
         submitted = st.form_submit_button("✅ 送出報名")
 
         if submitted:
-            合法代碼 = df[df['欲報名之群(類)別'] == 群別]['校系代碼'].tolist()
+            合法代碼 = df[df['欲報名之群(類)別'].isin(群別)]['校系代碼'].tolist()
             志願清單 = [志願1, 志願2, 志願3, 志願4, 志願5, 志願6]
             填寫代碼 = [c.strip() for c in 志願清單 if c.strip()]
             錯誤代碼 = [c for c in 填寫代碼 if c not in 合法代碼]
