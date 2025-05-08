@@ -45,12 +45,13 @@ with tab1:
             st.stop()
 
         st.markdown("請依序填寫最多6組志願校系代碼：")
-        志願1 = st.text_input("第1志願")
-        志願2 = st.text_input("第2志願")
-        志願3 = st.text_input("第3志願")
-        志願4 = st.text_input("第4志願")
-        志願5 = st.text_input("第5志願")
-        志願6 = st.text_input("第6志願")
+        組校系代碼1 = st.text_input("第1組校系代碼")
+        組校系代碼2 = st.text_input("第2組校系代碼")
+        組校系代碼3 = st.text_input("第3組校系代碼")
+        組校系代碼4 = st.text_input("第4組校系代碼")
+        組校系代碼5 = st.text_input("第5組校系代碼")
+        組校系代碼6 = st.text_input("第6組校系代碼")
+        submitted = st.form_submit_button("✅ 送出報名")
 
         submitted = st.form_submit_button("✅ 送出報名")
 
@@ -91,4 +92,3 @@ with tab2:
                 st.dataframe(結果)
         except Exception as e:
             st.error(f"查詢發生錯誤：{e}")
-
