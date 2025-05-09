@@ -49,26 +49,31 @@ with tab1:
     with st.form("身份驗證"):
         col1, col2 = st.columns(2)
         with col1:
-            exam_id = st.text_input("統測報名序號")
-            id_number = st.text_input("身分證字號")
+            st.session_state['exam_id'] = st.text_input("統測報名序號")
+            st.session_state['id_number'] = st.text_input("身分證字號")
         with col2:
-            name = st.text_input("考生姓名")
+            st.session_state['name'] = st.text_input("考生姓名")
         verify = st.form_submit_button("✅ 開始報名")
 
     if verify:
-        if not re.match(r"^[A-Z][0-9]{9}$", id_number.upper()):
+        if not re.match(r"^[A-Z][0-9]{9}$", st.session_state['id_number'].upper()):
             st.error("⚠️ 身分證格式錯誤，應為 1 大寫英文字 + 9 碼數字")
         else:
             match = df4[
-                (df4["統測報名序號"].str.strip() == exam_id.strip()) &
-                (df4["考生姓名"].str.strip() == name.strip()) &
-                (df4["身分證統一編號"].str.strip().str.upper() == id_number.strip().upper())
+                (df4["統測報名序號"].str.strip() == st.session_state['exam_id'].strip()) &
+                (df4["考生姓名"].str.strip() == st.session_state['name'].strip()) &
+                (df4["身分證統一編號"].str.strip().str.upper() == st.session_state['id_number'].strip().upper())
             ]
             if match.empty:
                 st.error("❌ 查無此考生資料，請確認輸入正確")
             else:
-                st.success("✅ 身份驗證成功，請繼續填寫報名資料")
+                st.session_state["已驗證"] = True
+        st.session_state["st.session_state['exam_id']"] = st.session_state['exam_id'].strip()
+        st.session_state["st.session_state['name']"] = st.session_state['name'].strip()
+        st.session_state["st.session_state['id_number']"] = st.session_state['id_number'].strip().upper()
+        st.success("✅ 身份驗證成功，請繼續填寫報名資料")
 
+                if "已驗證" in st.session_state and st.session_state["已驗證"]:
                 with st.form("apply_form"):
                     群別 = st.selectbox("統測報考群別", 群別選項)
 
@@ -116,8 +121,8 @@ with tab1:
                         所有資料 = 報名工作表.get_all_values()
                         已有_df = pd.DataFrame(所有資料[1:], columns=所有資料[0])
                         重複 = not 已有_df[
-                            (已有_df["統測報名序號"] == exam_id) &
-                            (已有_df["身分證字號"] == id_number)
+                            (已有_df["統測報名序號"] == st.session_state['exam_id']) &
+                            (已有_df["身分證字號"] == st.session_state['id_number'])
                         ].empty
 
                         if 不合法代碼:
@@ -130,7 +135,7 @@ with tab1:
                             tz = pytz.timezone("Asia/Taipei")
                             now = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
 
-                            row = [exam_id, name, id_number, 群別,
+                            row = [st.session_state['exam_id'], st.session_state['name'], st.session_state['id_number'], 群別,
                                    志願1, 志願2, 志願3, 志願4, 志願5, 志願6, now]
                             報名工作表.append_row(row)
                             st.success("✅ 報名成功！以下為您填寫的內容：")
@@ -156,13 +161,13 @@ with tab2:
             counts = Counter(標題原始)
             標題 = []
             seen = {}
-            for name in 標題原始:
-                if counts[name] == 1:
-                    標題.append(name)
+            for st.session_state['name'] in 標題原始:
+                if counts[st.session_state['name']] == 1:
+                    標題.append(st.session_state['name'])
                 else:
-                    i = seen.get(name, 1)
-                    標題.append(f"{name}_{i}")
-                    seen[name] = i + 1
+                    i = seen.get(st.session_state['name'], 1)
+                    標題.append(f"{st.session_state['name']}_{i}")
+                    seen[st.session_state['name']] = i + 1
             df查 = pd.DataFrame(資料[1:], columns=標題)
             結果 = df查[
                 (df查["統測報名序號"] == 查序號) &
