@@ -1,5 +1,6 @@
 
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
@@ -14,6 +15,9 @@ CREDS = Credentials.from_service_account_info(creds_dict, scopes=[
     'https://www.googleapis.com/auth/drive'
 ])
 CLIENT = gspread.authorize(CREDS)
+
+def show_alert(msg):
+    components.html(f"<script>alert(msg)</script>", height=0)
 
 # === 表單連結 ===
 try:
@@ -92,7 +96,8 @@ with tab1:
                 (df4["身分證統一編號"].str.strip().str.upper() == id_number.strip().upper())
             ]
             if match.empty:
-                st.error("❌ 查無此考生資料，請確認輸入正確")
+                show_alert("❌ 查無此考生資料，請確認輸入正確")
+                st.stop()
             else:
                 st.success("✅ 身份驗證成功，請繼續填寫報名資料")
 
@@ -148,9 +153,11 @@ with tab1:
                         ].empty
 
                         if 不合法代碼:
-                            st.error(f"以下代碼不符規定或無法報名：{', '.join(不合法代碼)}")
+                            show_alert("以下代碼不符規定或無法報名：" + ", ".join(不合法代碼))
+                            st.stop()
                         elif 超出校數:
-                            st.error(f"以下學校代碼超出可報名上限：{'；'.join(超出校數)}")
+                            show_alert("以下學校代碼超出可報名上限：" + "; ".join(超出校數))
+                            st.stop()
                         elif 重複:
                             st.warning("⚠️ 您已經填寫過報名，請勿重複提交。")
                         else:
@@ -178,8 +185,19 @@ with tab2:
     if st.button("查詢"):
         try:
             資料 = 報名工作表.get_all_values()
-            標題, 資料列 = 資料[0], 資料[1:]
-            df查 = pd.DataFrame(資料列, columns=標題)
+            標題原始 = 資料[0]
+            from collections import Counter
+            counts = Counter(標題原始)
+            標題 = []
+            seen = {}
+            for name in 標題原始:
+                if counts[name] == 1:
+                    標題.append(name)
+                else:
+                    i = seen.get(name, 1)
+                    標題.append(f"{name}_{i}")
+                    seen[name] = i + 1
+            df查 = pd.DataFrame(資料[1:], columns=標題)
             結果 = df查[
                 (df查["統測報名序號"] == 查序號) &
                 (df查["身分證字號"] == 查身分)
