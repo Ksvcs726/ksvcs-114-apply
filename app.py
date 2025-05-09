@@ -26,7 +26,7 @@ df = pd.DataFrame(raw[1:], columns=raw[0])
 報名表單_URL = 'https://docs.google.com/spreadsheets/d/1awfvTvLPkyZM3sGL41sflHtO7LgTkva-lkWx-2rUu7k/edit?usp=drive_link'
 報名工作表 = CLIENT.open_by_url(報名表單_URL).sheet1
 
-st.title("📋 高雄高商114學年度 第一階段甄選入學報名系統")
+st.title("📋 高雄高商114學年度 甄選入學第一階段報名系統")
 
 tab1, tab2 = st.tabs(["我要報名", "查詢報名紀錄"])
 
