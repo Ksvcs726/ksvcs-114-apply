@@ -202,7 +202,7 @@ with tab2:
     查身分 = st.text_input("請輸入身分證字號", key="查身分")
 
     if st.button("查詢"):
-    try:
+        try:
         資料 = 報名工作表.get_all_values()
         標題 = 資料[0]
         df查 = pd.DataFrame(資料[1:], columns=標題)
