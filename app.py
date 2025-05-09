@@ -1,14 +1,18 @@
 
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 import datetime
 import pytz
 import re
+import streamlit.components.v1 as components
+from collections import Counter
 
-# === 服務帳戶授權 ===
+def show_alert(msg):
+    components.html(f"<script>alert('{msg}')</script>", height=0)
+
+# === Google Sheets 驗證與自動檢查工作表 ===
 creds_dict = st.secrets["GOOGLE_CREDENTIALS"]
 CREDS = Credentials.from_service_account_info(creds_dict, scopes=[
     'https://www.googleapis.com/auth/spreadsheets',
@@ -16,40 +20,43 @@ CREDS = Credentials.from_service_account_info(creds_dict, scopes=[
 ])
 CLIENT = gspread.authorize(CREDS)
 
-def show_alert(msg):
-    components.html(f"<script>alert(msg)</script>", height=0)
+# === 表單設定 ===
+表單_URL = 'https://docs.google.com/spreadsheets/d/1RrOvJ_UeP5xu2-l-WJwDySn9d786E5P0hsv_XFq9ovg/edit?usp=sharing'
+報名紀錄_URL = 'https://docs.google.com/spreadsheets/d/1awfvTvLPkyZM3sGL41sflHtO7LgTkva-lkWx-2rUu7k/edit?usp=drive_link'
 
-# === 表單連結 ===
 try:
-    表單_URL = 'https://docs.google.com/spreadsheets/d/1RrOvJ_UeP5xu2-l-WJwDySn9d786E5P0hsv_XFq9ovg/edit?usp=sharing'
-    報名紀錄_URL = 'https://docs.google.com/spreadsheets/d/1awfvTvLPkyZM3sGL41sflHtO7LgTkva-lkWx-2rUu7k/edit?usp=drive_link'
-
     表單 = CLIENT.open_by_url(表單_URL)
     報名紀錄 = CLIENT.open_by_url(報名紀錄_URL)
 
-    分頁名單 = [s.title for s in 表單.worksheets()]
-    必要分頁 = ["工作表1", "工作表2", "工作表3", "工作表4"]
+    # 顯示目前分頁名稱，協助除錯用
+    所有分頁 = [s.title for s in 表單.worksheets()]
+    st.write("📋 Google Sheet 分頁清單：", 所有分頁)
 
-    缺少分頁 = [s for s in 必要分頁 if s not in 分頁名單]
-    if 缺少分頁:
+    需要工作表 = {
+        "工作表1": "df1 = pd.DataFrame(表單.worksheet('工作表1').get_all_records())",
+        "工作表2": "df2 = pd.DataFrame(表單.worksheet('工作表2').get_all_records())",
+        "工作表3": "df3 = pd.DataFrame(表單.worksheet('工作表3').get_all_records())",
+        "工作表4": "df4 = pd.DataFrame(表單.worksheet('工作表4').get_all_records())"
+    }
+
+    已定義 = {}
+    缺表 = []
+    for 表名, 指令 in 需要工作表.items():
+        try:
+            exec(指令, globals())
+            已定義[表名] = True
+        except Exception:
+            缺表.append(表名)
+
+    if 缺表:
+        show_alert(f"🚫 缺少 Google Sheet 工作表：{', '.join(缺表)}")
         st.stop()
-        st.error(f"❌ Google Sheet 缺少必要分頁：{', '.join(缺少分頁)}")
 
-    # 讀取分頁
-    工作表1 = 表單.worksheet("工作表1")
-    工作表2 = 表單.worksheet("工作表2")
-    工作表3 = 表單.worksheet("工作表3")
-    工作表4 = 表單.worksheet("工作表4")
-
-    df1 = pd.DataFrame(工作表1.get_all_records())
-    df2 = pd.DataFrame(工作表2.get_all_records())
-    df3 = pd.DataFrame(工作表3.get_all_records())
-    df4 = pd.DataFrame(工作表4.get_all_records())
     報名工作表 = 報名紀錄.sheet1
 
 except Exception as e:
+    show_alert("🚫 Google Sheet 無法連線或權限不足，請確認網址與分享權限。")
     st.stop()
-    st.error(f"❌ 無法讀取 Google Sheet，請確認分享權限與網址正確。錯誤：{e}")
 
 
 # === 資料來源 ===
@@ -95,8 +102,7 @@ with tab1:
                 (df4["身分證統一編號"].str.strip().str.upper() == id_number.strip().upper())
             ]
             if match.empty:
-                show_alert("❌ 查無此考生資料，請確認輸入正確")
-                st.stop()
+                st.error("❌ 查無此考生資料，請確認輸入正確")
             else:
                 st.success("✅ 身份驗證成功，請繼續填寫報名資料")
 
@@ -152,11 +158,9 @@ with tab1:
                         ].empty
 
                         if 不合法代碼:
-                            show_alert("以下代碼不符規定或無法報名：" + ", ".join(不合法代碼))
-                            st.stop()
+                            st.error(f"以下代碼不符規定或無法報名：{', '.join(不合法代碼)}")
                         elif 超出校數:
-                            show_alert("以下學校代碼超出可報名上限：" + "; ".join(超出校數))
-                            st.stop()
+                            st.error(f"以下學校代碼超出可報名上限：{'；'.join(超出校數)}")
                         elif 重複:
                             st.warning("⚠️ 您已經填寫過報名，請勿重複提交。")
                         else:
@@ -184,19 +188,8 @@ with tab2:
     if st.button("查詢"):
         try:
             資料 = 報名工作表.get_all_values()
-            標題原始 = 資料[0]
-            from collections import Counter
-            counts = Counter(標題原始)
-            標題 = []
-            seen = {}
-            for name in 標題原始:
-                if counts[name] == 1:
-                    標題.append(name)
-                else:
-                    i = seen.get(name, 1)
-                    標題.append(f"{name}_{i}")
-                    seen[name] = i + 1
-            df查 = pd.DataFrame(資料[1:], columns=標題)
+            標題, 資料列 = 資料[0], 資料[1:]
+            df查 = pd.DataFrame(資料列, columns=標題)
             結果 = df查[
                 (df查["統測報名序號"] == 查序號) &
                 (df查["身分證字號"] == 查身分)
