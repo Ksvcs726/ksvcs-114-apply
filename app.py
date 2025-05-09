@@ -82,7 +82,7 @@ from streamlit.runtime.scriptrunner import get_script_run_ctx
 raise RerunException(get_script_run_ctx())
 
 
-    if st.session_state["已驗證"]:
+if st.session_state["已驗證"]:
         with st.form("apply_form"):
             群別 = st.selectbox("統測報考群別", 群別選項)
             st.markdown("請依序填寫最多 6 組志願校系代碼：")
