@@ -49,8 +49,8 @@ try:
 
 except Exception as e:
     st.stop()
-    st.error(f"❌ 無法讀取 Google Sheet，請確認分享權限與網址正確。
-錯誤：{e}")
+    錯誤訊息 = f"❌ 無法讀取 Google Sheet，請確認分享權限與網址正確。\\n錯誤：{e}"
+st.error(錯誤訊息)
 
 
 # === 資料來源 ===
