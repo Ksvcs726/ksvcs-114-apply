@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import gspread
@@ -52,9 +53,9 @@ with tab1:
             st.error("⚠️ 身分證格式錯誤，應為 1 大寫英文字 + 9 碼數字")
         else:
             match = df4[
-                (df4["統測報名序號"] == exam_id.strip()) &
-                (df4["考生姓名"] == name.strip()) &
-                (df4["身分證統一編號"] == id_number.strip().upper())
+                (df4["統測報名序號"].str.strip() == exam_id.strip()) &
+                (df4["考生姓名"].str.strip() == name.strip()) &
+                (df4["身分證統一編號"].str.strip().str.upper() == id_number.strip().upper())
             ]
             if match.empty:
                 st.error("❌ 查無此考生資料，請確認輸入正確")
@@ -80,7 +81,6 @@ with tab1:
                         錯誤訊息 = []
                         有效志願 = [x for x in 志願清單 if x]
 
-                        # 查詢該群別對應可報名的招生群(類)別
                         可報名群列 = df3[df3["統測報考群(類)別"] == 群別]
                         可報名群別 = []
                         if not 可報名群列.empty:
@@ -130,7 +130,8 @@ with tab1:
 
                             df_show = pd.DataFrame([row], columns=[
                                 "統測報名序號", "姓名", "身分證字號", "群別",
-                                "志願1", "志願2", "志願3", "志願4", "志願5", "志願6",
+                                "第1組校系代碼", "第2組校系代碼", "第3組校系代碼",
+                                "第4組校系代碼", "第5組校系代碼", "第6組校系代碼",
                                 "填寫時間"
                             ])
                             st.dataframe(df_show)
