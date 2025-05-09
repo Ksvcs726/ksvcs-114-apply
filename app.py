@@ -84,21 +84,6 @@ with tab1:
             submitted = st.form_submit_button("📨 送出報名")
 
         if submitted:
-
-            # 檢查填寫的校系代碼是否在工作表1中存在
-            合法代碼 = df1["校系代碼"].tolist()
-            錯誤代碼 = [code for code in 填寫代碼 if code not in 合法代碼]
-            if 錯誤代碼:
-                st.error(f"❌ 以下校系代碼不正確或不存在於工作表1：{', '.join(錯誤代碼)}")
-                st.stop()
-
-        填寫代碼 = [c.strip() for c in [志願1, 志願2, 志願3, 志願4, 志願5, 志願6] if c.strip()]
-        合法代碼 = df1['校系代碼'].tolist()
-        錯誤代碼 = [code for code in 填寫代碼 if code not in 合法代碼]
-        if 錯誤代碼:
-            st.error(f"❌ 以下校系代碼不正確或不存在於工作表1：{', '.join(錯誤代碼)}")
-            st.stop()
-
             now = datetime.datetime.now(tz)
             if now > 報名截止時間:
                 st.error("❌ 報名已截止，無法提交。")
