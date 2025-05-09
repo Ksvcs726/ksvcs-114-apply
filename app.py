@@ -24,7 +24,13 @@ CLIENT = gspread.authorize(CREDS)
 工作表2 = CLIENT.open_by_url(表單_URL).worksheet('工作表2')  # 校數限制
 工作表3 = CLIENT.open_by_url(表單_URL).worksheet('工作表3')  # 群別可報名對照
 工作表4 = CLIENT.open_by_url(表單_URL).worksheet('工作表4')  # 考生基本資料
-報名工作表 = CLIENT.open_by_url(報名紀錄_URL).sheet1
+
+try:
+    報名工作表 = CLIENT.open_by_url(報名紀錄_URL).sheet1
+except Exception as e:
+    show_alert("❌ 無法開啟報名紀錄表單，請確認網址正確並已分享給服務帳戶！")
+    st.stop()
+
 
 df1 = pd.DataFrame(工作表1.get_all_records())
 df2 = pd.DataFrame(工作表2.get_all_records())
