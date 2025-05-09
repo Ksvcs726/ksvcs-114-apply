@@ -83,6 +83,19 @@ raise RerunException(get_script_run_ctx())
 
 
 if st.session_state["已驗證"]:
+    with st.form("apply_form"):
+        群別 = st.selectbox("統測報考群別", 群別選項)
+        st.markdown("請依序填寫最多 6 組志願校系代碼：")
+        志願1 = st.text_input("第1組校系代碼")
+        志願2 = st.text_input("第2組校系代碼")
+        志願3 = st.text_input("第3組校系代碼")
+        志願4 = st.text_input("第4組校系代碼")
+        志願5 = st.text_input("第5組校系代碼")
+        志願6 = st.text_input("第6組校系代碼")
+        submitted = st.form_submit_button("📨 送出報名")
+
+    if submitted:
+        st.success("✅ 表單已提交！稍後寫入處理邏輯...")
         with st.form("apply_form"):
             群別 = st.selectbox("統測報考群別", 群別選項)
             st.markdown("請依序填寫最多 6 組志願校系代碼：")
