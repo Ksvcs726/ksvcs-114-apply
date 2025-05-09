@@ -13,7 +13,7 @@ def show_alert(msg):
 
 # === 設定報名截止時間 ===
 tz = pytz.timezone("Asia/Taipei")
-報名截止時間 = datetime.datetime(2025, 5, 19, 12, 0, 0, tzinfo=tz)
+報名截止時間 = datetime.datetime(2025, 5, 10, 23, 59, 0, tzinfo=tz)
 
 # === Google Sheets 設定 ===
 creds_dict = st.secrets["GOOGLE_CREDENTIALS"]
@@ -84,6 +84,35 @@ with tab1:
             submitted = st.form_submit_button("📨 送出報名")
 
         if submitted:
+        # 檢查是否已報名
+        資料 = 報名工作表.get_all_values()
+        原始標題 = 資料[0]
+        counts = Counter(原始標題)
+        標題 = []
+        seen = {}
+        for name in 原始標題:
+            if counts[name] == 1:
+                標題.append(name)
+            else:
+                i = seen.get(name, 1)
+                標題.append(f"{name}_{i}")
+                seen[name] = i + 1
+        df查 = pd.DataFrame(資料[1:], columns=標題)
+        重複 = not df查[
+            (df查["統測報名序號"] == st.session_state["exam_id"]) &
+            (df查["身分證字號"] == st.session_state["id_number"])
+        ].empty
+        if 重複:
+            st.warning("⚠️ 您已經完成報名，請勿重複填寫。")
+            st.stop()
+
+        # 檢查志願校系代碼是否存在
+        所有合法代碼 = df1["校系代碼"].tolist()
+        錯誤代碼 = [code for code in 填寫代碼 if code not in 所有合法代碼]
+        if 錯誤代碼:
+            st.error("❌ 以下校系代碼不正確或不存在於工作表1：" + ", ".join(錯誤代碼))
+            st.stop()
+
             now = datetime.datetime.now(tz)
             if now > 報名截止時間:
                 st.error("❌ 報名已截止，無法提交。")
