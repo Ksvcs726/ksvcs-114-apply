@@ -30,7 +30,6 @@ try:
 
     # 顯示目前分頁名稱，協助除錯用
     所有分頁 = [s.title for s in 表單.worksheets()]
-    st.write("📋 Google Sheet 分頁清單：", 所有分頁)
 
     需要工作表 = {
         "工作表1": "df1 = pd.DataFrame(表單.worksheet('工作表1').get_all_records())",
