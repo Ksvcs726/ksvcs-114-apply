@@ -1,62 +1,20 @@
 
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 import datetime
 import pytz
 import re
-import streamlit.components.v1 as components
-from collections import Counter
 
-def show_alert(msg):
-    components.html(f"<script>alert('{msg}')</script>", height=0)
-
-# === Google Sheets 驗證與自動檢查工作表 ===
+# --- Google Sheets 連線 ---
 creds_dict = st.secrets["GOOGLE_CREDENTIALS"]
 CREDS = Credentials.from_service_account_info(creds_dict, scopes=[
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive'
 ])
 CLIENT = gspread.authorize(CREDS)
-
-# === 表單設定 ===
-表單_URL = 'https://docs.google.com/spreadsheets/d/1RrOvJ_UeP5xu2-l-WJwDySn9d786E5P0hsv_XFq9ovg/edit?usp=sharing'
-報名紀錄_URL = 'https://docs.google.com/spreadsheets/d/1awfvTvLPkyZM3sGL41sflHtO7LgTkva-lkWx-2rUu7k/edit?usp=drive_link'
-
-try:
-    表單 = CLIENT.open_by_url(表單_URL)
-    報名紀錄 = CLIENT.open_by_url(報名紀錄_URL)
-
-    # 顯示目前分頁名稱，協助除錯用
-    所有分頁 = [s.title for s in 表單.worksheets()]
-
-    需要工作表 = {
-        "工作表1": "df1 = pd.DataFrame(表單.worksheet('工作表1').get_all_records())",
-        "工作表2": "df2 = pd.DataFrame(表單.worksheet('工作表2').get_all_records())",
-        "工作表3": "df3 = pd.DataFrame(表單.worksheet('工作表3').get_all_records())",
-        "工作表4": "df4 = pd.DataFrame(表單.worksheet('工作表4').get_all_records())"
-    }
-
-    已定義 = {}
-    缺表 = []
-    for 表名, 指令 in 需要工作表.items():
-        try:
-            exec(指令, globals())
-            已定義[表名] = True
-        except Exception:
-            缺表.append(表名)
-
-    if 缺表:
-        show_alert(f"🚫 缺少 Google Sheet 工作表：{', '.join(缺表)}")
-        st.stop()
-
-    報名工作表 = 報名紀錄.sheet1
-
-except Exception as e:
-    show_alert("🚫 Google Sheet 無法連線或權限不足，請確認網址與分享權限。")
-    st.stop()
-
 
 # === 資料來源 ===
 表單_URL = 'https://docs.google.com/spreadsheets/d/1RrOvJ_UeP5xu2-l-WJwDySn9d786E5P0hsv_XFq9ovg/edit?usp=sharing'
