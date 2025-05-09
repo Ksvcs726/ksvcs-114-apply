@@ -37,7 +37,7 @@ df4 = pd.DataFrame(表單.worksheet('工作表4').get_all_records())
 
 群別選項 = sorted(df3["統測報考群(類)別"].unique())
 
-st.title("📋 高雄高商\n114學年度 甄選入學第一階段報名系統")
+st.title("📋 高雄高商114學年度 甄選入學第一階段報名系統")
 tab1, tab2 = st.tabs(["我要報名", "查詢報名紀錄"])
 
 with tab1:
