@@ -1,5 +1,7 @@
 
 import streamlit as st
+import pytz
+報名截止時間 = datetime(2025, 5, 10, 23, 59, 0, tzinfo=pytz.timezone("Asia/Taipei"))
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
@@ -34,7 +36,7 @@ try:
     df4 = pd.DataFrame(表單.worksheet('工作表4').get_all_records())
     報名工作表 = 報名紀錄.sheet1
 except Exception as e:
-    show_alert("❌ 無法連接 Google Sheet，請確認連結與授權。")
+        show_alert("❌ 無法連接 Google Sheet，請確認連結與授權。")
     st.stop()
 
 群別選項 = sorted(df3["統測報考群(類)別"].unique())
@@ -95,6 +97,18 @@ if st.session_state["已驗證"]:
         submitted = st.form_submit_button("📨 送出報名")
 
     if submitted:
+        現在時間 = datetime.now(pytz.timezone("Asia/Taipei"))
+        if 現在時間 > 報名截止時間:
+            st.error("❌ 報名已截止，無法提交表單。")
+        else:
+            填寫代碼 = [c for c in [志願1, 志願2, 志願3, 志願4, 志願5, 志願6] if c.strip()]
+            now = 現在時間.strftime("%Y-%m-%d %H:%M:%S")
+            row = [exam_id, name, id_number, 群別] + 填寫代碼 + [""] * (6 - len(填寫代碼)) + [now]
+            try:
+                報名工作表.append_row(row)
+                st.success("✅ 報名成功！資料已儲存")
+            except Exception as e:
+                st.error(f"❌ 資料儲存失敗：{e}")
         st.success("✅ 表單已提交！這裡是你要補上的寫入邏輯區塊...")
     with st.form("apply_form"):
         群別 = st.selectbox("統測報考群別", 群別選項)
@@ -213,4 +227,4 @@ with tab2:
                 st.success("查詢成功，以下是您填寫的資料：")
                 st.dataframe(結果)
         except Exception as e:
-        st.error(f"查詢發生錯誤：{e}")
+            st.error(f"查詢發生錯誤：{e}")
