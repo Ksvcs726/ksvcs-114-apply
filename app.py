@@ -13,7 +13,7 @@ def show_alert(msg):
 
 # === 設定報名截止時間 ===
 tz = pytz.timezone("Asia/Taipei")
-報名截止時間 = datetime.datetime(2025, 5, 10, 23, 59, 0, tzinfo=tz)
+報名截止時間 = datetime.datetime(2025, 5, 19, 12, 0, 0, tzinfo=tz)
 
 # === Google Sheets 設定 ===
 creds_dict = st.secrets["GOOGLE_CREDENTIALS"]
