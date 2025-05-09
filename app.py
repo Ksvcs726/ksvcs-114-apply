@@ -76,7 +76,11 @@ with tab1:
                 st.session_state["name"] = name.strip()
                 st.session_state["id_number"] = id_number.strip().upper()
                 st.success("✅ 身份驗證成功，請繼續填寫報名資料")
-                st.experimental_rerun()
+                
+from streamlit.runtime.scriptrunner import RerunException
+from streamlit.runtime.scriptrunner import get_script_run_ctx
+raise RerunException(get_script_run_ctx())
+
 
     if st.session_state["已驗證"]:
         with st.form("apply_form"):
