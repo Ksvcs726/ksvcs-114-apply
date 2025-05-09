@@ -203,14 +203,14 @@ with tab2:
 
     if st.button("查詢"):
         try:
-        資料 = 報名工作表.get_all_values()
-        標題 = 資料[0]
-        df查 = pd.DataFrame(資料[1:], columns=標題)
-        結果 = df查[(df查["統測報名序號"] == 查序號) & (df查["身分證字號"] == 查身分)]
-        if 結果.empty:
-            st.info("查無資料，請確認輸入正確。")
-        else:
-            st.success("查詢成功，以下是您填寫的資料：")
-            st.dataframe(結果)
-    except Exception as e:
+            資料 = 報名工作表.get_all_values()
+            標題 = 資料[0]
+            df查 = pd.DataFrame(資料[1:], columns=標題)
+            結果 = df查[(df查["統測報名序號"] == 查序號) & (df查["身分證字號"] == 查身分)]
+            if 結果.empty:
+                st.info("查無資料，請確認輸入正確。")
+            else:
+                st.success("查詢成功，以下是您填寫的資料：")
+                st.dataframe(結果)
+        except Exception as e:
         st.error(f"查詢發生錯誤：{e}")
