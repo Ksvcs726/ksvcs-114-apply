@@ -95,6 +95,19 @@ if st.session_state["已驗證"]:
         submitted = st.form_submit_button("📨 送出報名")
 
     if submitted:
+        st.success("✅ 表單已提交！這裡是你要補上的寫入邏輯區塊...")
+    with st.form("apply_form"):
+        群別 = st.selectbox("統測報考群別", 群別選項)
+        st.markdown("請依序填寫最多 6 組志願校系代碼：")
+        志願1 = st.text_input("第1組校系代碼")
+        志願2 = st.text_input("第2組校系代碼")
+        志願3 = st.text_input("第3組校系代碼")
+        志願4 = st.text_input("第4組校系代碼")
+        志願5 = st.text_input("第5組校系代碼")
+        志願6 = st.text_input("第6組校系代碼")
+        submitted = st.form_submit_button("📨 送出報名")
+
+    if submitted:
         st.success("✅ 表單已提交！稍後寫入處理邏輯...")
         with st.form("apply_form"):
             群別 = st.selectbox("統測報考群別", 群別選項)
@@ -189,28 +202,3 @@ with tab2:
     查身分 = st.text_input("請輸入身分證字號", key="查身分")
 
     if st.button("查詢"):
-        try:
-            資料 = 報名工作表.get_all_values()
-            原始標題 = 資料[0]
-            counts = Counter(原始標題)
-            標題 = []
-            seen = {}
-            for name in 原始標題:
-                if counts[name] == 1:
-                    標題.append(name)
-                else:
-                    i = seen.get(name, 1)
-                    標題.append(f"{name}_{i}")
-                    seen[name] = i + 1
-            df查 = pd.DataFrame(資料[1:], columns=標題)
-            結果 = df查[
-                (df查["統測報名序號"] == 查序號) &
-                (df查["身分證字號"] == 查身分)
-            ]
-            if 結果.empty:
-                st.info("查無資料，請確認輸入正確。")
-            else:
-                st.success("查詢成功，以下是您填寫的資料：")
-                st.dataframe(結果)
-        except Exception as e:
-            st.error(f"查詢發生錯誤：{e}")
