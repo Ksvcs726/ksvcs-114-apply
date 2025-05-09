@@ -146,6 +146,7 @@ with tab1:
                                    志願1, 志願2, 志願3, 志願4, 志願5, 志願6, now]
                             報名工作表.append_row(row)
                             st.success("✅ 報名成功！以下為您填寫的內容：")
+                            st.session_state["已送出"] = True
 
                             df_show = pd.DataFrame([row], columns=[
                                 "統測報名序號", "姓名", "身分證字號", "群別",
