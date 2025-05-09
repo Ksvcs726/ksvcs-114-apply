@@ -7,13 +7,47 @@ import datetime
 import pytz
 import re
 
-# --- Google Sheets 連線 ---
+# === 服務帳戶授權 ===
 creds_dict = st.secrets["GOOGLE_CREDENTIALS"]
 CREDS = Credentials.from_service_account_info(creds_dict, scopes=[
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive'
 ])
 CLIENT = gspread.authorize(CREDS)
+
+# === 表單連結 ===
+try:
+    表單_URL = 'https://docs.google.com/spreadsheets/d/1RrOvJ_UeP5xu2-l-WJwDySn9d786E5P0hsv_XFq9ovg/edit?usp=sharing'
+    報名紀錄_URL = 'https://docs.google.com/spreadsheets/d/1awfvTvLPkyZM3sGL41sflHtO7LgTkva-lkWx-2rUu7k/edit?usp=drive_link'
+
+    表單 = CLIENT.open_by_url(表單_URL)
+    報名紀錄 = CLIENT.open_by_url(報名紀錄_URL)
+
+    分頁名單 = [s.title for s in 表單.worksheets()]
+    必要分頁 = ["工作表1", "工作表2", "工作表3", "工作表4"]
+
+    缺少分頁 = [s for s in 必要分頁 if s not in 分頁名單]
+    if 缺少分頁:
+        st.stop()
+        st.error(f"❌ Google Sheet 缺少必要分頁：{', '.join(缺少分頁)}")
+
+    # 讀取分頁
+    工作表1 = 表單.worksheet("工作表1")
+    工作表2 = 表單.worksheet("工作表2")
+    工作表3 = 表單.worksheet("工作表3")
+    工作表4 = 表單.worksheet("工作表4")
+
+    df1 = pd.DataFrame(工作表1.get_all_records())
+    df2 = pd.DataFrame(工作表2.get_all_records())
+    df3 = pd.DataFrame(工作表3.get_all_records())
+    df4 = pd.DataFrame(工作表4.get_all_records())
+    報名工作表 = 報名紀錄.sheet1
+
+except Exception as e:
+    st.stop()
+    st.error(f"❌ 無法讀取 Google Sheet，請確認分享權限與網址正確。
+錯誤：{e}")
+
 
 # === 資料來源 ===
 表單_URL = 'https://docs.google.com/spreadsheets/d/1RrOvJ_UeP5xu2-l-WJwDySn9d786E5P0hsv_XFq9ovg/edit?usp=sharing'
